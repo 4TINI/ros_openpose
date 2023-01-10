@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+
+<launch>
+    <!-- note that the following parameters are going to assigned by other launch file upon call. -->
+    <arg name="print" default=""/>
+    <arg name="frame_id" default=""/>
+    <arg name="skeleton" default=""/>
+    <arg name="pub_topic" default=""/>
+    <arg name="color_topic" default=""/>
+    <arg name="id_text_size" default=""/>
+    <arg name="openpose_args" default=""/>
+    <arg name="id_text_offset" default=""/>
+    <arg name="skeleton_hands" default=""/>
+    <arg name="skeleton_line_width" default=""/>
+
+    <node name="ros_openpose" pkg="ros_openpose" type="ros_openpose" output="screen" required="false" args="$(arg openpose_args)">
+        <param name="frame_id" value="$(arg frame_id)" />
+        <param name="pub_topic" value="$(arg pub_topic)" />
+        <param name="color_topic" value="$(arg color_topic)" />
+        <remap from="ros_openpose/color/image_raw" to="$(arg color_topic)"/>
+    </node>
+</launch>

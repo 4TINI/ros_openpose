@@ -1,23 +1,13 @@
-/**
-* rosOpenpose.cpp: the main file. it consists of two workers input and output worker.
-*                  the job of the input worker is to provide color images to openpose wrapper.
-*                  the job of the output worker is to receive the keypoints detected in 2D
-*                  space. it then converts 2D pixels to 3D coordinates (wrt camera coordinate
-*                  system)/
-* Author: Ravi Joshi
-* Date: 2019/09/27
-* src: https://github.com/CMU-Perceptual-Computing-Lab/openpose/tree/master/examples/tutorial_api_cpp
-*/
-
 // todo: merge the 'for' loop for body and hand keypoints into one
 
 // OpenPose headers
 #include <openpose/flags.hpp>
 #include <openpose/headers.hpp>
+#include <realtime_tools/realtime_publisher.h>
 
 // ros_openpose headers
-#include <ros_openpose/Frame.h>
-#include <ros_openpose/cameraReader.hpp>
+#include <ros_wrapper_openpose/SkeletonArray.h>
+#include <ros_wrapper_openpose/cameraReader.hpp>
 
 // define a macro for compatibility with older versions
 #define OPENPOSE1POINT6_OR_HIGHER OpenPose_VERSION_MAJOR >= 1 && OpenPose_VERSION_MINOR >= 6
@@ -109,10 +99,10 @@ class WUserOutput : public op::WorkerConsumer<sPtrVecSPtrDatum>
 {
 public:
   // clang-format off
-  WUserOutput(const ros::Publisher& framePublisher,
+  WUserOutput(const std::shared_ptr<realtime_tools::RealtimePublisher<open_vico_msgs::SkeletonArray>>& framePublisher,
               const std::shared_ptr<ros_openpose::CameraReader>& sPtrCameraReader,
-              const std::string& frameId, const bool noDepth)
-    : mFramePublisher(framePublisher), mSPtrCameraReader(sPtrCameraReader), mNoDepth(noDepth)
+              const std::string& frameId, const bool /*noDepth*/)
+    : mFramePublisher(framePublisher), mSPtrCameraReader(sPtrCameraReader)
   {
     mFrame.header.frame_id = frameId;
   }
@@ -126,29 +116,23 @@ public:
   void fillBodyROSMsg(Array& poseKeypoints, int person, int bodyPartCount)
   {
 #pragma omp parallel for
+    // for (auto bodyPart = 0; bodyPart < bodyPartCount; bodyPart++)
     for (auto bodyPart = 0; bodyPart < bodyPartCount; bodyPart++)
     {
       // src:
       // https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/doc/output.md#keypoint-format-in-the-c-api
       const auto baseIndex = poseKeypoints.getSize(2) * (person * bodyPartCount + bodyPart);
+
       const auto x = poseKeypoints[baseIndex];
       const auto y = poseKeypoints[baseIndex + 1];
       const auto score = poseKeypoints[baseIndex + 2];
 
-      float point3D[3];
-      // compute 3D point only if depth flag is set
-      if (!mNoDepth)
-        mSPtrCameraReader->compute3DPoint(x, y, point3D);
-
-      mFrame.persons[person].bodyParts[bodyPart].pixel.x = x;
-      mFrame.persons[person].bodyParts[bodyPart].pixel.y = y;
-      mFrame.persons[person].bodyParts[bodyPart].score = score;
-      mFrame.persons[person].bodyParts[bodyPart].point.x = point3D[0];
-      mFrame.persons[person].bodyParts[bodyPart].point.y = point3D[1];
-      mFrame.persons[person].bodyParts[bodyPart].point.z = point3D[2];
+      // mFrame.skeletons[person].body_parts[bodyPart].score = score;
+      mFrame.skeletons[person].bodyParts[bodyPart].pixel.x = x;
+      mFrame.skeletons[person].bodyParts[bodyPart].pixel.y = y;
+      mFrame.skeletons[person].bodyParts[bodyPart].score = score;
     }
   }
-
   template <typename ArrayOfArray>
   void fillHandROSMsg(ArrayOfArray& handKeypoints, int person, int handPartCount)
   {
@@ -167,29 +151,13 @@ public:
       const auto yRight = handKeypoints[1][baseIndex + 1];
       const auto scoreRight = handKeypoints[1][baseIndex + 2];
 
-      float point3DLeft[3];
-      float point3DRight[3];
+      mFrame.skeletons[person].leftHandParts[handPart].pixel.x = xLeft;
+      mFrame.skeletons[person].leftHandParts[handPart].pixel.y = yLeft;
+      mFrame.skeletons[person].leftHandParts[handPart].score = scoreLeft;
 
-      // compute 3D point only if depth flag is set
-      if (!mNoDepth)
-      {
-        mSPtrCameraReader->compute3DPoint(xLeft, yLeft, point3DLeft);
-        mSPtrCameraReader->compute3DPoint(xRight, yRight, point3DRight);
-      }
-
-      mFrame.persons[person].leftHandParts[handPart].pixel.x = xLeft;
-      mFrame.persons[person].leftHandParts[handPart].pixel.y = yLeft;
-      mFrame.persons[person].leftHandParts[handPart].score = scoreLeft;
-      mFrame.persons[person].leftHandParts[handPart].point.x = point3DLeft[0];
-      mFrame.persons[person].leftHandParts[handPart].point.y = point3DLeft[1];
-      mFrame.persons[person].leftHandParts[handPart].point.z = point3DLeft[2];
-
-      mFrame.persons[person].rightHandParts[handPart].pixel.x = xRight;
-      mFrame.persons[person].rightHandParts[handPart].pixel.y = yRight;
-      mFrame.persons[person].rightHandParts[handPart].score = scoreRight;
-      mFrame.persons[person].rightHandParts[handPart].point.x = point3DRight[0];
-      mFrame.persons[person].rightHandParts[handPart].point.y = point3DRight[1];
-      mFrame.persons[person].rightHandParts[handPart].point.z = point3DRight[2];
+      mFrame.skeletons[person].rightHandParts[handPart].pixel.x = xRight;
+      mFrame.skeletons[person].rightHandParts[handPart].pixel.y = yRight;
+      mFrame.skeletons[person].rightHandParts[handPart].score = scoreRight;
     }
   }
 
@@ -206,20 +174,10 @@ public:
       const auto yFace = faceKeypoints[baseIndex + 1];
       const auto scoreFace = faceKeypoints[baseIndex + 2];
 
-      float point3DFace[3];
 
-      // compute 3D point only if depth flag is set
-      if (!mNoDepth)
-      {
-        mSPtrCameraReader->compute3DPoint(xFace, yFace, point3DFace);
-      }
-
-      mFrame.persons[person].faceParts[facePart].pixel.x = xFace;
-      mFrame.persons[person].faceParts[facePart].pixel.y = yFace;
-      mFrame.persons[person].faceParts[facePart].score = scoreFace;
-      mFrame.persons[person].faceParts[facePart].point.x = point3DFace[0];
-      mFrame.persons[person].faceParts[facePart].point.y = point3DFace[1];
-      mFrame.persons[person].faceParts[facePart].point.z = point3DFace[2];
+      mFrame.skeletons[person].faceParts[facePart].pixel.x = xFace;
+      mFrame.skeletons[person].faceParts[facePart].pixel.y = yFace;
+      mFrame.skeletons[person].faceParts[facePart].score = scoreFace;
     }
   }
 
@@ -233,10 +191,7 @@ public:
         mFrame.header.stamp = ros::Time::now();
 
         // make sure to clear previous data
-        mFrame.persons.clear();
-
-        // we use the latest depth image for computing point in 3D space
-        mSPtrCameraReader->lockLatestDepthImage();
+        mFrame.skeletons.clear();
 
         // accesing each element of the keypoints
         const auto& poseKeypoints = datumsPtr->at(0)->poseKeypoints;
@@ -247,17 +202,17 @@ public:
         const auto personCount = poseKeypoints.getSize(0);
         const auto bodyPartCount = poseKeypoints.getSize(1);
         const auto handPartCount = handKeypoints[0].getSize(1);
-        const auto facePartCount = faceKeypoints.getSize(1);        
+        const auto facePartCount = faceKeypoints.getSize(1); 
 
-        mFrame.persons.resize(personCount);
+        mFrame.skeletons.resize(personCount);
 
         // update with the new data
         for (auto person = 0; person < personCount; person++)
         {
-          mFrame.persons[person].bodyParts.resize(bodyPartCount);
-          mFrame.persons[person].leftHandParts.resize(handPartCount);
-          mFrame.persons[person].rightHandParts.resize(handPartCount);
-          mFrame.persons[person].faceParts.resize(facePartCount);          
+          mFrame.skeletons[person].bodyParts.resize(bodyPartCount);
+          mFrame.skeletons[person].leftHandParts.resize(handPartCount);
+          mFrame.skeletons[person].rightHandParts.resize(handPartCount);
+          mFrame.skeletons[person].faceParts.resize(facePartCount);          
 
           fillBodyROSMsg(poseKeypoints, person, bodyPartCount);
           fillHandROSMsg(handKeypoints, person, handPartCount);
@@ -281,17 +236,17 @@ public:
   }
 
 private:
-  const bool mNoDepth;
   ros_openpose::Frame mFrame;
   const ros::Publisher mFramePublisher;
+
   const std::shared_ptr<ros_openpose::CameraReader> mSPtrCameraReader;
 };
 
 // clang-format off
 void configureOpenPose(op::Wrapper& opWrapper,
                        const std::shared_ptr<ros_openpose::CameraReader>& cameraReader,
-                       const ros::Publisher& framePublisher,
-                       const std::string& frameId, const bool noDepth)
+                       const std::shared_ptr<realtime_tools::RealtimePublisher<open_vico_msgs::SkeletonArray>>& framePublisher,
+                       const std::string& frameId)
 // clang-format on
 {
   try
@@ -379,7 +334,7 @@ void configureOpenPose(op::Wrapper& opWrapper,
 
     // Initializing the user custom classes
     auto wUserInput = std::make_shared<WUserInput>(cameraReader);
-    auto wUserOutput = std::make_shared<WUserOutput>(framePublisher, cameraReader, frameId, noDepth);
+    auto wUserOutput = std::make_shared<WUserOutput>(framePublisher, cameraReader, frameId, false);
 
     // Add custom processing
     const auto workerInputOnNewThread = true;
@@ -537,16 +492,12 @@ int main(int argc, char* argv[])
   ros::NodeHandle nh("~");
 
   // define the parameters, we are going to read
-  bool noDepth;
-  std::string colorTopic, depthTopic, camInfoTopic, frameId, pubTopic;
+  std::string colorTopic, frameId, pubTopic;
 
   // read the parameters from relative nodel handle
   nh.getParam("frame_id", frameId);
   nh.getParam("pub_topic", pubTopic);
-  nh.param("no_depth", noDepth, false);  // default value is false
   nh.getParam("color_topic", colorTopic);
-  nh.getParam("depth_topic", depthTopic);
-  nh.getParam("cam_info_topic", camInfoTopic);
 
   if (pubTopic.empty())
   {
@@ -557,16 +508,16 @@ int main(int argc, char* argv[])
   // parsing command line flags
   gflags::ParseCommandLineFlags(&argc, &argv, true);
 
-  const auto cameraReader = std::make_shared<ros_openpose::CameraReader>(nh, colorTopic, depthTopic, camInfoTopic);
+  const auto cameraReader = std::make_shared<ros_openpose::CameraReader>(nh, colorTopic);
 
   // the frame consists of the location of detected body parts of each person
-  const ros::Publisher framePublisher = nh.advertise<ros_openpose::Frame>(pubTopic, 1);
+  const ros::Publisher framePublisher = nh.advertise<ros_openpose::SkeletonArray>(pubTopic, 1);
 
   try
   {
     ROS_INFO("Starting ros_openpose...");
     op::Wrapper opWrapper;
-    configureOpenPose(opWrapper, cameraReader, framePublisher, frameId, noDepth);
+    configureOpenPose(opWrapper, cameraReader, framePublisher, frameId);
 
     // start and run
     opWrapper.start();

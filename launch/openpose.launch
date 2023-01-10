@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- 64 128 192 256 368 -->
+    <arg name="res" default="368" />
+    <arg name="camera_number" default="0" />
+    <arg name="number_people_max" default="1" />
+    <arg name="gpu_id" default="1" />
+    <arg name="color_topic" default="/camera$(arg camera_number)/rgb/image_raw" />
+    <arg name="pub_topic" default="/camera$(arg camera_number)/frame" />
+
+    <!-- set this flag to not show gui -->
+    <arg name="headless_mode" default="false"/>
+
+    <!-- flag to enable printing ros message to terminal -->
+    <arg name="print" default="false" />
+
+    <!-- set this flag to invoke the visualization of the skeleton -->
+    <arg name="skeleton" default="true" />
+
+    <!-- set this flag to invoke the visualization of the hands of the skeleton -->
+    <arg name="skeleton_hands" default="false" />
+
+    <arg if="$(arg headless_mode)" name="headless_display_arg" value="--display 0"/>
+    <arg unless="$(arg headless_mode)" name="headless_display_arg" value=""/>
+
+    <arg if="$(arg skeleton_hands)" name="hands_arg" value="--hand"/>
+    <arg unless="$(arg skeleton_hands)" name="hands_arg" value=""/>
+
+    <!-- full path to the model dir of openpose -->
+    <!-- num_gpu 1 num_gpu_start $(arg gpu_id)  -->
+    <arg name="openpose_args" value="--model_folder $(env HOME)/git/openpose/models/ $(arg hands_arg) --number_people_max $(arg number_people_max) --net_resolution -1x$(arg res) $(arg headless_display_arg)" /> 
+
+    <include file="$(find ros_openpose)/launch/core.xml" pass_all_args="true" ns="camera$(arg camera_number)"/>
+
+</launch>

@@ -5,8 +5,8 @@
   <description>ROS wrapper for OpenPose</description>
 
   <!-- The maintainer tag -->
-  <maintainer email="ravi2008joshi@gmail.com">Ravi Joshi</maintainer>
-  <author email="ravi2008joshi@gmail.com">Ravi Joshi</author>
+  <maintainer email="lucafortini60@gmail.com">Luca Fortini</maintainer>
+  <author email="lucafortini60@gmail.com">Luca Fortini</author>
 
   <!-- The license tag -->
   <license>MIT</license>
@@ -15,15 +15,11 @@
   <build_depend>roscpp</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>geometry_msgs</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-  <build_depend>message_filters</build_depend>
 
   <exec_depend>roscpp</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
-  <exec_depend>message_runtime</exec_depend>
-  <exec_depend>sensor_msgs</exec_depend>
-  <exec_depend>message_filters</exec_depend>
+
   <export>
   </export>
 </package>
