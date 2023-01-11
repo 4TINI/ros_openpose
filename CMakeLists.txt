@@ -76,7 +76,7 @@ catkin_install_python(PROGRAMS
 # add_dependencies(${PROJECT_NAME}_node_sync ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 # target_link_libraries(${PROJECT_NAME}_node_sync ${OpenPose_LIBS} gflags ${GFLAGS_LIBRARY} ${GLOG_LIBRARY} ${OpenCV_LIBS} ${catkin_LIBRARIES})
 
-add_executable(${PROJECT_NAME}_node src/rosOpenposeAsync.cpp src/cameraReader.cpp)
-set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME "ros_openpose")
-add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(${PROJECT_NAME}_node ${OpenPose_LIBS} gflags ${GFLAGS_LIBRARY} ${GLOG_LIBRARY} ${OpenCV_LIBS} ${catkin_LIBRARIES})
+# add_executable(${PROJECT_NAME}_node src/rosOpenposeAsync.cpp src/cameraReader.cpp)
+# set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME "ros_openpose")
+# add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(${PROJECT_NAME}_node ${OpenPose_LIBS} gflags ${GFLAGS_LIBRARY} ${GLOG_LIBRARY} ${OpenCV_LIBS} ${catkin_LIBRARIES})
