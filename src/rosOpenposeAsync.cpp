@@ -6,8 +6,8 @@
 #include <realtime_tools/realtime_publisher.h>
 
 // ros_openpose headers
-#include <ros_wrapper_openpose/SkeletonArray.h>
-#include <ros_wrapper_openpose/cameraReader.hpp>
+#include <ros_openpose/SkeletonArray.h>
+#include <ros_openpose/cameraReader.hpp>
 
 // define a macro for compatibility with older versions
 #define OPENPOSE1POINT6_OR_HIGHER OpenPose_VERSION_MAJOR >= 1 && OpenPose_VERSION_MINOR >= 6
