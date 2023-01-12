@@ -45,6 +45,7 @@ catkin_package(
   CATKIN_DEPENDS
   std_msgs
   geometry_msgs
+  sensor_msgs
 )
 
 ## Build

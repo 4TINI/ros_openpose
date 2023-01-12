@@ -217,9 +217,13 @@ public:
           fillBodyROSMsg(poseKeypoints, person, bodyPartCount);
           fillHandROSMsg(handKeypoints, person, handPartCount);
           fillFaceROSMsg(faceKeypoints, person, facePartCount);
+        }        
+        if (mFramePublisher->trylock())
+        {
+          mFramePublisher->msg_= mFrame;
+          // mFramePublisher.publish(mFrame);
+          mFramePublisher->unlockAndPublish();
         }
-
-        mFramePublisher.publish(mFrame);
       }
       else
       {
@@ -236,8 +240,9 @@ public:
   }
 
 private:
-  ros_openpose::Frame mFrame;
-  const ros::Publisher mFramePublisher;
+  ros_openpose::SkeletonArray mFrame;
+  std::shared_ptr<realtime_tools::RealtimePublisher<ros_openpose::SkeletonArray>> mFramePublisher;
+
 
   const std::shared_ptr<ros_openpose::CameraReader> mSPtrCameraReader;
 };
@@ -511,7 +516,9 @@ int main(int argc, char* argv[])
   const auto cameraReader = std::make_shared<ros_openpose::CameraReader>(nh, colorTopic);
 
   // the frame consists of the location of detected body parts of each person
-  const ros::Publisher framePublisher = nh.advertise<ros_openpose::SkeletonArray>(pubTopic, 1);
+  // const ros::Publisher framePublisher = nh.advertise<ros_openpose::SkeletonArray>(pubTopic, 1);
+  std::shared_ptr<realtime_tools::RealtimePublisher<ros_openpose::SkeletonArray>> framePublisher;
+  framePublisher = std::make_shared<realtime_tools::RealtimePublisher<ros_openpose::SkeletonArray>>(nh, pubTopic, 1);
 
   try
   {
