@@ -1,4 +1,4 @@
-#include <ros_wrapper_openpose/cameraReader.hpp>
+#include <ros_openpose/cameraReader.hpp>
 
 namespace ros_openpose
 {

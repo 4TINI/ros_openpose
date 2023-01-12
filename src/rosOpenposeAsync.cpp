@@ -99,7 +99,7 @@ class WUserOutput : public op::WorkerConsumer<sPtrVecSPtrDatum>
 {
 public:
   // clang-format off
-  WUserOutput(const std::shared_ptr<realtime_tools::RealtimePublisher<open_vico_msgs::SkeletonArray>>& framePublisher,
+  WUserOutput(const std::shared_ptr<realtime_tools::RealtimePublisher<ros_openpose::SkeletonArray>>& framePublisher,
               const std::shared_ptr<ros_openpose::CameraReader>& sPtrCameraReader,
               const std::string& frameId, const bool /*noDepth*/)
     : mFramePublisher(framePublisher), mSPtrCameraReader(sPtrCameraReader)
@@ -245,7 +245,7 @@ private:
 // clang-format off
 void configureOpenPose(op::Wrapper& opWrapper,
                        const std::shared_ptr<ros_openpose::CameraReader>& cameraReader,
-                       const std::shared_ptr<realtime_tools::RealtimePublisher<open_vico_msgs::SkeletonArray>>& framePublisher,
+                       const std::shared_ptr<realtime_tools::RealtimePublisher<ros_openpose::SkeletonArray>>& framePublisher,
                        const std::string& frameId)
 // clang-format on
 {
