@@ -1,10 +1,20 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="cameras_list" default="[0, 1, 2, 3]"/>
-    <arg name="res" default="256"/>
-    <arg name="number_people_max" default="1" />
-    <arg name="headless_mode" default="true"/>
+
+    <arg name="cameras_list" default="[0, 1, 2, 3]"/> <!-- [0, 1, ... N] -->
+    <arg name="res" default="368"/> <!-- 64 128 192 256 368 -->
+    <arg name="number_people_max" default="1" /> <!-- # of available GPUs -->
+    <arg name="headless_mode" default="false"/> <!-- output visualization -->
     <arg name="num_gpus" default="2"/>
+
+    <!-- set this flag to invoke the visualization of the skeleton -->
+    <arg name="skeleton" default="true" />
+    <!-- set this flag to invoke the visualization of the hands of the skeleton -->
+    <arg name="skeleton_hands" default="false" />
+    <!-- set this flag to invoke the visualization of the face of the skeleton -->
+    <arg name="skeleton_face" default="false" />
+
+    <include file="$(find ros_openpose)/launch/remapper.xml" />
 
     <node name="multi_openpose" pkg="ros_openpose" type="multi_openpose.py">
         <param name="cameras_list" value="$(arg cameras_list)" />
@@ -12,6 +22,9 @@
         <param name="number_people_max" value="$(arg number_people_max)" />
         <param name="headless_mode" value="$(arg headless_mode)" />
         <param name="num_gpus" value="$(arg num_gpus)" />
+        <param name="skeleton_flag" value="$(arg skeleton)" />
+        <param name="hands_flag" value="$(arg skeleton_hands)" />
+        <param name="face_flag" value="$(arg skeleton_face)" />
     </node>
 
 </launch>

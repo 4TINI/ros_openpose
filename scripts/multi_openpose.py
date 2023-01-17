@@ -50,13 +50,17 @@ if __name__ == '__main__':
     rospack = rospkg.RosPack()
 
     # get the file path for rospy_tutorials
-    pack_path = rospack.get_path('open_vico_openpose')
+    pack_path = rospack.get_path('ros_openpose')
 
     cameras_list = rospy.get_param('~cameras_list', '[0]')
     res = rospy.get_param('~res', 368)
     number_people_max = rospy.get_param('~number_people_max', 1)
     headless_mode = rospy.get_param('~headless_mode', False)
     num_gpus = rospy.get_param('~num_gpus', 2)
+
+    skeleton_flag = rospy.get_param('~skeleton_flag', True)
+    hands_flag = rospy.get_param('~hands_flag', False)
+    face_flag = rospy.get_param('~face_flag', False)
 
     # cameras_list = [[int(x.strip(' ')) for x in ss.lstrip(' [,').split(', ')] for ss in cameras_list.rstrip(']').split(']')]
     cameras_list = [int(item) for sublist in cameras_list for item in sublist if item.isdigit()]
@@ -82,10 +86,12 @@ if __name__ == '__main__':
         launch_args.append('camera_number:='+str(value))
         launch_args.append('color_topic:=/camera'+str(value)+'/rgb/image_raw')
         launch_args.append('pub_topic:=/camera'+str(value)+'/frame')
-        openpose_launch = ROSLauncher('open_vico_openpose',
-                                        rospack.get_path('open_vico_openpose')+'/launch/openpose.launch',
-                                        launch_args)
-                                        
+        launch_args.append('skeleton:='+str(skeleton_flag))
+        launch_args.append('skeleton_hands:='+str(hands_flag))
+        launch_args.append('skeleton_face:='+str(face_flag))
+        openpose_launch = ROSLauncher('ros_openpose',
+                                        rospack.get_path('ros_openpose')+'/launch/openpose.xml',
+                                        launch_args)                                        
         openpose_launch.start()
 
         

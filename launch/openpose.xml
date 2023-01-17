@@ -7,7 +7,7 @@
     <arg name="number_people_max" default="1" />
     <arg name="gpu_id" default="1" />
     <arg name="color_topic" default="/camera$(arg camera_number)/rgb/image_raw" />
-    <arg name="pub_topic" default="/camera$(arg camera_number)/frame" />
+    <arg name="pub_topic" default="/camera$(arg camera_number)/skeleton" />
 
     <!-- set this flag to not show gui -->
     <arg name="headless_mode" default="false"/>
@@ -19,7 +19,10 @@
     <arg name="skeleton" default="true" />
 
     <!-- set this flag to invoke the visualization of the hands of the skeleton -->
-    <arg name="skeleton_hands" default="false" />
+    <arg name="skeleton_hands" default="true" />
+
+    <!-- set this flag to invoke the visualization of the face of the skeleton -->
+    <arg name="skeleton_face" default="true" />
 
     <arg if="$(arg headless_mode)" name="headless_display_arg" value="--display 0"/>
     <arg unless="$(arg headless_mode)" name="headless_display_arg" value=""/>
@@ -27,9 +30,12 @@
     <arg if="$(arg skeleton_hands)" name="hands_arg" value="--hand"/>
     <arg unless="$(arg skeleton_hands)" name="hands_arg" value=""/>
 
+    <arg if="$(arg skeleton_face)" name="face_arg" value="--face"/>
+    <arg unless="$(arg skeleton_face)" name="face_arg" value=""/>
+
     <!-- full path to the model dir of openpose -->
     <!-- num_gpu 1 num_gpu_start $(arg gpu_id)  -->
-    <arg name="openpose_args" value="--model_folder $(env HOME)/git/openpose/models/ $(arg hands_arg) --number_people_max $(arg number_people_max) --net_resolution -1x$(arg res) $(arg headless_display_arg)" /> 
+    <arg name="openpose_args" value="--model_folder $(env HOME)/git/openpose/models/ $(arg face_arg) $(arg hands_arg) --number_people_max $(arg number_people_max) --net_resolution -1x$(arg res) $(arg headless_display_arg)" /> 
 
     <include file="$(find ros_openpose)/launch/core.xml" pass_all_args="true" ns="camera$(arg camera_number)"/>
 

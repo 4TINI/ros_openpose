@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+
+    <node pkg="topic_tools" 
+            type="relay" 
+            name="relay_info" 
+            args="/camera/color/camera_info /camera0/rgb/camera_info" ns="camera0"/>
+    <node pkg="topic_tools" 
+            type="relay" 
+            name="relay_image_raw" 
+            args="/camera/color/image_raw /camera0/rgb/image_raw" ns="camera0"/>       
+
+</launch>
