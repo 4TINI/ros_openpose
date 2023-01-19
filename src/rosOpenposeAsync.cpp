@@ -6,7 +6,7 @@
 #include <realtime_tools/realtime_publisher.h>
 
 // ros_openpose headers
-#include <ros_openpose/SkeletonArray.h>
+#include <human_skeleton_msgs/SkeletonArray.h>
 #include <ros_openpose/cameraReader.hpp>
 
 // define a macro for compatibility with older versions

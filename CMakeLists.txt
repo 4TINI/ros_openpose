@@ -9,7 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   cv_bridge
-  message_generation
+  human_skeleton_msgs
 )
 
 ## Make sure 'FindGFlags.cmake' and 'FindGlog.cmake' are visible to cmake
@@ -46,6 +46,7 @@ catkin_package(
   std_msgs
   geometry_msgs
   sensor_msgs
+  human_skeleton_msgs
 )
 
 ## Build
