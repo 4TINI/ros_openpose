@@ -64,21 +64,15 @@ link_directories(
   ${catkin_LIBRARY_DIRS}
 )
 
-## Path to Caffe lib i.e., libcaffe.so
-set(CAFFE_LIB_FOLDER ${OpenPose_DIR}/../../lib)
-link_directories(${CAFFE_LIB_FOLDER})
+## Path to OpenPose lib i.e., libopenpose.so
+set(OpenPose_LIBRARY ${OpenPose_DIR}/../../src/openpose/libopenpose.so)
 
 catkin_install_python(PROGRAMS 
                       scripts/multi_openpose.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION} 
 )
 
-# add_executable(${PROJECT_NAME}_node_sync src/open_vico_openpose_node.cpp)
-# set_target_properties(${PROJECT_NAME}_node_sync PROPERTIES OUTPUT_NAME "open_vico_openpose")
-# add_dependencies(${PROJECT_NAME}_node_sync ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-# target_link_libraries(${PROJECT_NAME}_node_sync ${OpenPose_LIBS} gflags ${GFLAGS_LIBRARY} ${GLOG_LIBRARY} ${OpenCV_LIBS} ${catkin_LIBRARIES})
-
 add_executable(${PROJECT_NAME}_node src/rosOpenposeAsync.cpp src/cameraReader.cpp)
 set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME "ros_openpose")
 add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(${PROJECT_NAME}_node ${OpenPose_LIBS} gflags ${GFLAGS_LIBRARY} ${GLOG_LIBRARY} ${OpenCV_LIBS} ${catkin_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}_node ${OpenPose_LIBRARY} gflags ${GFLAGS_LIBRARY} ${GLOG_LIBRARY} ${OpenCV_LIBS} ${catkin_LIBRARIES})
